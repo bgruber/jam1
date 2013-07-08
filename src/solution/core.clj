@@ -38,18 +38,17 @@
             (replaces ss)
             (inserts ss))))
 
-(defn edits2 [word]
-  (let [e1 (edits1 word)]
-    (concat e1
-            (map edits1 e1))))
+(defn edits2 [word e1]
+  (concat e1 (map edits1 e1)))
 
 (defn make-known [words]
   (set (filter @NWORDS words)))
 
 (defn correct [word]
-  (or (seq (set (sort-by @NWORDS
-                         (mapcat make-known [[word] (edits1 word) (edits2 word)]))))
-      [word]))
+  (let [e1 (edits1 word)]
+    (or (seq (set (sort-by @NWORDS
+                           (mapcat make-known [[word] e1 (edits2 word e1)]))))
+              [word])))
 
 (defn addword! [word]
   (swap! NWORDS update-in [word] (fnil inc 0)))
